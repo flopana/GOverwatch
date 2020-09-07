@@ -1,15 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
+	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/events"
 	"os"
-
-	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 )
-
-var allplayers map[int]*common.Player
 
 func main() {
 	welcome := `   __________                                 __       __  
@@ -20,6 +17,10 @@ func main() {
 		`
 	fmt.Println(welcome)
 
+	var owStartRound int
+	fmt.Println("In which round did your Overwatch case start?")
+	_, err := fmt.Scanf("%d", &owStartRound)
+
 	f, err := os.Open("003434868561326113214_1747621417.dem")
 	if err != nil {
 		panic(err)
@@ -29,26 +30,23 @@ func main() {
 	p := dem.NewParser(f)
 	defer p.Close()
 	//Register handler on kill events
-	p.RegisterEventHandler(func(e events.Kill) {
-		var hs string
-		if e.IsHeadshot {
-			hs = " (HS)"
+	p.RegisterEventHandler(func(e events.RoundEnd) {
+		allplayers := p.GameState().Participants().AllByUserID()
+		fmt.Println("##########################################################################")
+		fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed())
+		for i:=3; i<len(allplayers); i++ {
+			fmt.Printf("Player: %s, SteamID64: %d\n", allplayers[i].Name, allplayers[i].SteamID64)
+			fmt.Printf("K: %d, A: %d, D: %d\n\n", allplayers[i].Kills(), allplayers[i].Assists(), allplayers[i].Deaths())
 		}
-		var wallBang string
-		if e.PenetratedObjects > 0 {
-			wallBang = " (WB)"
+		if p.GameState().TotalRoundsPlayed() >= owStartRound {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print("Advance to next round?")
+			_, _ = reader.ReadString('\n')
 		}
-		fmt.Printf("%s <%v%s%s> %s\n", e.Killer, e.Weapon, hs, wallBang, e.Victim)
-	})
-	p.RegisterEventHandler(func(e events.MatchStart) {
-		allplayers = p.GameState().Participants().AllByUserID()
-		delete(allplayers, 2) // Delete GOTV entity
 	})
 
 	// Parse to end
 	err = p.ParseToEnd()
-
-	fmt.Println(allplayers)
 
 	if err != nil {
 		panic(err)
