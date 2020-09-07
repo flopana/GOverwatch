@@ -41,7 +41,7 @@ func main() {
 		fmt.Printf("%s <%v%s%s> %s\n", e.Killer, e.Weapon, hs, wallBang, e.Victim)
 	})
 	p.RegisterEventHandler(func(e events.MatchStart) {
-		allplayers := p.GameState().Participants().AllByUserID()
+		allplayers = p.GameState().Participants().AllByUserID()
 		delete(allplayers, 2) // Delete GOTV entity
 	})
 
