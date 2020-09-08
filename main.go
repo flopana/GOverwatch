@@ -39,9 +39,6 @@ func main() {
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()-1)
 		}
 		for _, player := range allplayers{
-			if player.IsBot{
-				continue
-			}
 			fmt.Printf("Player: %s, SteamID64: %d\n", player.Name, player.SteamID64)
 			fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 		}
