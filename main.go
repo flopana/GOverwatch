@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+var owStartRound int
+
 func main() {
 	welcome := `   __________                                 __       __  
   / ____/ __ \_   _____  ______      ______ _/ /______/ /_ 
@@ -16,10 +18,6 @@ func main() {
 \____/\____/ |___/\___/_/    |__/|__/\__,_/\__/\___/_/ /_/
 		`
 	fmt.Println(welcome)
-
-	var owStartRound int
-	fmt.Println("In which round did your Overwatch case start?")
-	_, err := fmt.Scanf("%d", &owStartRound)
 
 	f, err := os.Open("003435053515502780722_0826630968.dem")
 	if err != nil {
@@ -47,6 +45,13 @@ func main() {
 			reader := bufio.NewReader(os.Stdin)
 			_, _ = reader.ReadString('\n')
 		}
+	})
+	p.RegisterEventHandler(func(e events.MatchStart) {
+		fmt.Printf("Map: %s\n", p.Header().MapName)
+		fmt.Printf("Server: %s\n\n", p.Header().ServerName)
+
+		fmt.Println("In which round did your Overwatch case start?")
+		_, _ = fmt.Scanf("%d", &owStartRound)
 	})
 
 	// Parse to end
