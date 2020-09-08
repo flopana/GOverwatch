@@ -31,23 +31,30 @@ func main() {
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundEnd) {
-		allplayers := p.GameState().Participants().AllByUserID()
+		allplayers := p.GameState().Participants().Playing()
 		fmt.Println("##########################################################################")
-		fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed())
-		for i:=3; i<len(allplayers); i++ {
-			fmt.Printf("Player: %s, SteamID64: %d\n", allplayers[i].Name, allplayers[i].SteamID64)
-			fmt.Printf("K: %d, A: %d, D: %d\n\n", allplayers[i].Kills(), allplayers[i].Assists(), allplayers[i].Deaths())
+		if p.GameState().IsWarmupPeriod(){
+			fmt.Printf("Current Round: Warmup\n\n")
+		}else{
+			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()-1)
 		}
-		if p.GameState().TotalRoundsPlayed() >= owStartRound {
-			reader := bufio.NewReader(os.Stdin)
+		for _, player := range allplayers{
+			if player.IsBot{
+				continue
+			}
+			fmt.Printf("Player: %s, SteamID64: %d\n", player.Name, player.SteamID64)
+			fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
+		}
+		if p.GameState().TotalRoundsPlayed()-1 >= owStartRound {
 			fmt.Print("Advance to next round?")
+			reader := bufio.NewReader(os.Stdin)
 			_, _ = reader.ReadString('\n')
 		}
 	})
 
 	// Parse to end
 	err = p.ParseToEnd()
-	//if err != nil {
-	//	panic(err)
-	//}
+	if err != nil {
+		fmt.Println(err)
+	}
 }
