@@ -21,7 +21,7 @@ func main() {
 	fmt.Println("In which round did your Overwatch case start?")
 	_, err := fmt.Scanf("%d", &owStartRound)
 
-	f, err := os.Open("003434868561326113214_1747621417.dem")
+	f, err := os.Open("003435053515502780722_0826630968.dem")
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,6 @@ func main() {
 
 	// Parse to end
 	err = p.ParseToEnd()
-
 	if err != nil {
 		panic(err)
 	}
