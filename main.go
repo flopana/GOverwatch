@@ -47,7 +47,7 @@ func main() {
 
 	// Parse to end
 	err = p.ParseToEnd()
-	if err != nil {
-		panic(err)
-	}
+	//if err != nil {
+	//	panic(err)
+	//}
 }
