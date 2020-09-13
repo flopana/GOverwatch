@@ -46,7 +46,7 @@ func main() {
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
 		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
 			allplayers := p.GameState().Participants().Playing()
-			fmt.Println("##########################################################################")
+			fmt.Println("\n##########################################################################")
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
 			for _, player := range allplayers {
 				var profileurl string
