@@ -23,6 +23,7 @@ func main() {
 		`
 	fmt.Println(welcome)
 
+	//TODO: Implement HTTP Sniffing for .dem.bz2 link
 	f, err := os.Open("003435053515502780722_0826630968.dem")
 	if err != nil {
 		panic(err)
