@@ -12,7 +12,7 @@ import (
 
 var owStartRound int
 //https://steamcommunity.com/dev/apikey
-const SteamWebApiKey = "5FF5EF4778DF00E92FB0B76676DFE822"
+const SteamWebApiKey = "5FF5EF4778DF00E92FB0B76676DFE822" // TODO: Implement a config file for the API Key
 
 func main() {
 	welcome := `   __________                                 __       __  
