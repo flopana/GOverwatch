@@ -3,12 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/antchfx/jsonquery"
 	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/events"
 	"os"
+	"strconv"
 )
 
 var owStartRound int
+//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
+const STEAM_WEB_API_KEY = "5FF5EF4778DF00E92FB0B76676DFE822"
 
 func main() {
 	welcome := `   __________                                 __       __  
@@ -29,23 +33,31 @@ func main() {
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
-		allplayers := p.GameState().Participants().Playing()
-		fmt.Println("##########################################################################")
-		fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
-		for _, player := range allplayers {
-			var team string
-			if player.Team == 2 {
-				team = "T"
-			} else {
-				team = "CT"
-			}
-			fmt.Printf("Team: %s ,Player: %s, SteamID64: %d\n", team, player.Name, player.SteamID64)
-			fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
-		}
 		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
-			fmt.Print("Advance to next round?")
-			reader := bufio.NewReader(os.Stdin)
-			_, _ = reader.ReadString('\n')
+			allplayers := p.GameState().Participants().Playing()
+			fmt.Println("##########################################################################")
+			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
+			for _, player := range allplayers {
+				var profileurl string
+				if player.SteamID64 != 0 {
+					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + STEAM_WEB_API_KEY + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
+
+					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
+						profileurl = n.InnerText()
+					}
+				}
+				var team string
+				if player.Team == 2 {
+					team = "T"
+				} else {
+					team = "CT"
+				}
+				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, player.Name, player.SteamID64, profileurl)
+				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
+			}
+				fmt.Print("Advance to next round?")
+				reader := bufio.NewReader(os.Stdin)
+				_, _ = reader.ReadString('\n')
 		}
 	})
 	p.RegisterEventHandler(func(e events.MatchStart) {
