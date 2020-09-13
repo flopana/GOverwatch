@@ -61,10 +61,17 @@ func main() {
 				var team string
 				if player.Team == 2 {
 					team = "T"
-				} else {
+				}else {
 					team = "CT"
 				}
-				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, player.Name, player.SteamID64, profileurl)
+
+				var botName string
+				if player.IsBot{
+					botName = "BOT "
+				}else {
+					botName = ""
+				}
+				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
 				fmt.Print("Advance to next round?")
