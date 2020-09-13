@@ -11,8 +11,7 @@ import (
 )
 
 var owStartRound int
-//https://steamcommunity.com/dev/apikey
-const steamWebApiKey = "5FF5EF4778DF00E92FB0B76676DFE822" // TODO: Implement a config file for the API Key
+const WarningColor = "\033[1;33m%s\033[0m"
 
 func main() {
 	welcome := `   __________                                 __       __  
@@ -23,24 +22,35 @@ func main() {
 		`
 	fmt.Println(welcome)
 
+	//https://steamcommunity.com/dev/apikey
+	config, err := os.Open("./config.json")
+	doc, err := jsonquery.Parse(config)
+	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
+	if steamWebApiKey == ""{
+		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
+			"\notherwise you will not get the Profile links" +
+			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
+	}
+	defer config.Close()
+
 	//TODO: Implement HTTP Sniffing for .dem.bz2 link
-	f, err := os.Open("003435053515502780722_0826630968.dem")
+	demo, err := os.Open("demo.dem")
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
+	defer demo.Close()
 
-	p := dem.NewParser(f)
+	p := dem.NewParser(demo)
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
 		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
 			allplayers := p.GameState().Participants().Playing()
-			fmt.Println("##########################################################################")
+			fmt.Println("\n##########################################################################")
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
 			for _, player := range allplayers {
 				var profileurl string
-				if player.SteamID64 != 0 {
+				if player.SteamID64 != 0 && steamWebApiKey != ""{
 					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
 
@@ -51,13 +61,20 @@ func main() {
 				var team string
 				if player.Team == 2 {
 					team = "T"
-				} else {
+				}else {
 					team = "CT"
 				}
-				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, player.Name, player.SteamID64, profileurl)
+
+				var botName string
+				if player.IsBot{
+					botName = "BOT "
+				}else {
+					botName = ""
+				}
+				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
-				fmt.Print("Advance to next round?")
+				fmt.Print("Advance to next round? [Press ENTER]")
 				reader := bufio.NewReader(os.Stdin)
 				_, _ = reader.ReadString('\n')
 		}
