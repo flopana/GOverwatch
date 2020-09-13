@@ -31,16 +31,18 @@ func main() {
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
 		allplayers := p.GameState().Participants().Playing()
 		fmt.Println("##########################################################################")
-		if p.GameState().IsWarmupPeriod(){
-			fmt.Printf("Current Round: Warmup\n\n")
-		}else{
-			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()-1)
-		}
-		for _, player := range allplayers{
-			fmt.Printf("Player: %s, SteamID64: %d\n", player.Name, player.SteamID64)
+		fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
+		for _, player := range allplayers {
+			var team string
+			if player.Team == 2 {
+				team = "T"
+			} else {
+				team = "CT"
+			}
+			fmt.Printf("Team: %s ,Player: %s, SteamID64: %d\n", team, player.Name, player.SteamID64)
 			fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 		}
-		if p.GameState().TotalRoundsPlayed()-1 >= owStartRound {
+		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
 			fmt.Print("Advance to next round?")
 			reader := bufio.NewReader(os.Stdin)
 			_, _ = reader.ReadString('\n')
