@@ -11,7 +11,7 @@ import (
 )
 
 var owStartRound int
-//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
+//https://steamcommunity.com/dev/apikey
 const SteamWebApiKey = "5FF5EF4778DF00E92FB0B76676DFE822"
 
 func main() {
@@ -40,6 +40,7 @@ func main() {
 			for _, player := range allplayers {
 				var profileurl string
 				if player.SteamID64 != 0 {
+					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + SteamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
 
 					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
