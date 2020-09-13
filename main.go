@@ -28,7 +28,7 @@ func main() {
 	p := dem.NewParser(f)
 	defer p.Close()
 	//Register handler on kill events
-	p.RegisterEventHandler(func(e events.RoundEnd) {
+	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
 		allplayers := p.GameState().Participants().Playing()
 		fmt.Println("##########################################################################")
 		if p.GameState().IsWarmupPeriod(){
