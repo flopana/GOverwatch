@@ -34,7 +34,7 @@ func main() {
 	defer config.Close()
 
 	//TODO: Implement HTTP Sniffing for .dem.bz2 link
-	demo, err := os.Open("003435053515502780722_0826630968.dem")
+	demo, err := os.Open("demo.dem")
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +74,7 @@ func main() {
 				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
-				fmt.Print("Advance to next round?")
+				fmt.Print("Advance to next round? [Press ENTER]")
 				reader := bufio.NewReader(os.Stdin)
 				_, _ = reader.ReadString('\n')
 		}
