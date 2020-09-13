@@ -27,9 +27,9 @@ func main() {
 	doc, err := jsonquery.Parse(config)
 	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
 	if steamWebApiKey == ""{
-		fmt.Println("WARNING Your SteamWebApiKey is empty consider to configure this in the config.json" +
-			"\nOtherwise you will not get the Profile links" +
-			"\nGet your API Key here https://steamcommunity.com/dev/apikey")
+		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider to configure this in the config.json," +
+			"\notherwise you will not get the Profile links" +
+			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
 	}
 	defer config.Close()
 
