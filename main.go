@@ -22,7 +22,7 @@ var owStartRound int
 const WarningColor = "\033[1;33m%s\033[0m"
 
 var (
-	device       string = "\\Device\\NPF_{AF220758-92F6-4291-BCBB-B03578A5B83F}"
+	device       string = "\\Device\\NPF_{AF220758-92F6-4291-BCBB-B03578A5B83F}" //TODO implement configuration for that
 	snapshot_len int32  = 1024
 	promiscuous  bool   = false
 	err          error
