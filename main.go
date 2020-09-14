@@ -4,14 +4,30 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/antchfx/jsonquery"
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/pcap"
 	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/events"
+	"io"
+	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 var owStartRound int
 const WarningColor = "\033[1;33m%s\033[0m"
+
+var (
+	device       string = "\\Device\\NPF_{AF220758-92F6-4291-BCBB-B03578A5B83F}"
+	snapshot_len int32  = 1024
+	promiscuous  bool   = false
+	err          error
+	timeout      time.Duration = 10 * time.Second
+	handle       *pcap.Handle
+)
 
 func main() {
 	welcome := `   __________                                 __       __  
@@ -21,6 +37,50 @@ func main() {
 \____/\____/ |___/\___/_/    |__/|__/\__,_/\__/\___/_/ /_/
 		`
 	fmt.Println(welcome)
+	fmt.Println("Starting to Capture")
+
+	//devices, err := pcap.FindAllDevs()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//// Print device information
+	//fmt.Println("Devices found:")
+	//for _, device := range devices {
+	//	fmt.Println("\nName: ", device.Name)
+	//	fmt.Println("Description: ", device.Description)
+	//	fmt.Println("Devices addresses: ", device.Description)
+	//	for _, address := range device.Addresses {
+	//		fmt.Println("- IP address: ", address.IP)
+	//		fmt.Println("- Subnet mask: ", address.Netmask)
+	//	}
+	//}
+
+	//Open device
+	handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+	if err != nil {log.Fatal(err) }
+	defer handle.Close()
+
+	//Use the handle as a packet source to process all packets
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	var first string
+	var second string
+	for packet := range packetSource.Packets() {
+		//fmt.Printf("%s",packet.Data())
+		if strings.Contains(string(packet.Data()), ".dem.bz2"){
+			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "net")+3])
+			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
+			print(first)
+			print(second)
+			break
+		}
+	}
+	fileUrl := "http://"+first+second
+	err := DownloadFile("demo.dem", fileUrl)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Downloaded: " + fileUrl)
 
 	//https://steamcommunity.com/dev/apikey
 	config, err := os.Open("./config.json")
@@ -92,4 +152,24 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+func DownloadFile(filepath string, url string) error {
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
