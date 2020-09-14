@@ -2,3 +2,7 @@
 *.dem
 
 config.json
+
+*.bz2
+
+*.exe
