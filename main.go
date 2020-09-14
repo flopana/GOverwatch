@@ -79,7 +79,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Downloaded: " + fileUrl)
+	fmt.Println("Downloaded: " + fileUrl + "\n\n")
 
 	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
 	if err != nil{
