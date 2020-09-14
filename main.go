@@ -8,6 +8,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/events"
+	"github.com/mholt/archiver/v3"
 	"io"
 	"log"
 	"net/http"
@@ -70,17 +71,20 @@ func main() {
 		if strings.Contains(string(packet.Data()), ".dem.bz2"){
 			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "net")+3])
 			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
-			print(first)
-			print(second)
 			break
 		}
 	}
 	fileUrl := "http://"+first+second
-	err := DownloadFile("demo.dem", fileUrl)
+	err := DownloadFile("demo.dem.bz2", fileUrl)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Downloaded: " + fileUrl)
+
+	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
+	if err != nil{
+		panic(err)
+	}
 
 	//https://steamcommunity.com/dev/apikey
 	config, err := os.Open("./config.json")
