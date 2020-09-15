@@ -22,7 +22,6 @@ var owStartRound int
 const WarningColor = "\033[1;33m%s\033[0m"
 
 var (
-	device       string = "\\Device\\NPF_{AF220758-92F6-4291-BCBB-B03578A5B83F}" //TODO implement configuration for that
 	snapshot_len int32  = 1024
 	promiscuous  bool   = false
 	err          error
@@ -45,10 +44,31 @@ func main() {
 	doc, err := jsonquery.Parse(config)
 	if err != nil{panic(err)}
 	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
+	ethernetDevice := jsonquery.FindOne(doc, "ethernetDevice").InnerText()
 	if steamWebApiKey == ""{
 		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
 			"\notherwise you will not get the Profile links" +
 			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
+	}
+	if ethernetDevice == ""{
+		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put in in the ethernetDevice in config.json\n")
+		devices, err := pcap.FindAllDevs()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Print ethernetDevice information
+		fmt.Println("Devices found:")
+		for _, ethernetDevice := range devices {
+			fmt.Println("\nName: ", ethernetDevice.Name)
+			fmt.Println("Description: ", ethernetDevice.Description)
+			fmt.Println("Devices addresses: ", ethernetDevice.Description)
+			for _, address := range ethernetDevice.Addresses {
+				fmt.Println("- IP address: ", address.IP)
+				fmt.Println("- Subnet mask: ", address.Netmask)
+			}
+		}
+		os.Exit(0)
 	}
 	defer config.Close()
 
@@ -59,20 +79,20 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//
-	//// Print device information
+	//// Print ethernetDevice information
 	//fmt.Println("Devices found:")
-	//for _, device := range devices {
-	//	fmt.Println("\nName: ", device.Name)
-	//	fmt.Println("Description: ", device.Description)
-	//	fmt.Println("Devices addresses: ", device.Description)
-	//	for _, address := range device.Addresses {
+	//for _, ethernetDevice := range devices {
+	//	fmt.Println("\nName: ", ethernetDevice.Name)
+	//	fmt.Println("Description: ", ethernetDevice.Description)
+	//	fmt.Println("Devices addresses: ", ethernetDevice.Description)
+	//	for _, address := range ethernetDevice.Addresses {
 	//		fmt.Println("- IP address: ", address.IP)
 	//		fmt.Println("- Subnet mask: ", address.Netmask)
 	//	}
 	//}
 
-	//Open device
-	handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+	//Open ethernetDevice
+	handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
 	if err != nil {log.Fatal(err) }
 	defer handle.Close()
 
