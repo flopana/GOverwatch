@@ -38,6 +38,20 @@ func main() {
 \____/\____/ |___/\___/_/    |__/|__/\____/\__/\___/_/ /_/
 		`
 	fmt.Println(welcome)
+
+	//https://steamcommunity.com/dev/apikey
+	config, err := os.Open("./config.json")
+	if err != nil{panic(err)}
+	doc, err := jsonquery.Parse(config)
+	if err != nil{panic(err)}
+	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
+	if steamWebApiKey == ""{
+		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
+			"\notherwise you will not get the Profile links" +
+			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
+	}
+	defer config.Close()
+
 	fmt.Println("Starting to Capture")
 
 	//devices, err := pcap.FindAllDevs()
@@ -75,7 +89,7 @@ func main() {
 		}
 	}
 	fileUrl := "http://"+first+second
-	err := DownloadFile("demo.dem.bz2", fileUrl)
+	err = DownloadFile("demo.dem.bz2", fileUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -86,16 +100,6 @@ func main() {
 		panic(err)
 	}
 
-	//https://steamcommunity.com/dev/apikey
-	config, err := os.Open("./config.json")
-	doc, err := jsonquery.Parse(config)
-	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
-	if steamWebApiKey == ""{
-		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
-			"\notherwise you will not get the Profile links" +
-			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
-	}
-	defer config.Close()
 
 	demo, err := os.Open("demo.dem")
 	if err != nil {
