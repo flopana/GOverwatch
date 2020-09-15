@@ -39,3 +39,5 @@ to
 **How do I find my device?**
 
 Simply don't fill out the "networkDevice" GOverwatch will list all available devices
+
+For further questions don't hesitate to open an issue
