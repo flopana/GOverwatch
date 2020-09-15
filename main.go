@@ -45,20 +45,20 @@ func main() {
 	doc, err := jsonquery.Parse(config)
 	if err != nil{panic(err)}
 	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
-	ethernetDevice := jsonquery.FindOne(doc, "ethernetDevice").InnerText()
+	networkDevice := jsonquery.FindOne(doc, "networkDevice").InnerText()
 	if steamWebApiKey == ""{
 		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
 			"\notherwise you will not get the Profile links" +
 			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
 	}
-	if ethernetDevice == ""{
-		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put it in the ethernetDevice in config.json\n")
+	if networkDevice == ""{
+		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put it in the networkDevice in config.json\n")
 		devices, err := pcap.FindAllDevs()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Print ethernetDevice information
+		// Print networkDevice information
 		fmt.Println("Devices found:")
 		for _, ethernetDevice := range devices {
 			fmt.Println("\nName: ", ethernetDevice.Name)
@@ -75,8 +75,8 @@ func main() {
 
 	fmt.Println("Searching for the demo\nPlease start downloading the Overwatch case")
 
-	//Open ethernetDevice
-	handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
+	//Open networkDevice
+	handle, err = pcap.OpenLive(networkDevice, snapshot_len, promiscuous, timeout)
 	if err != nil {log.Fatal(err) }
 	defer handle.Close()
 

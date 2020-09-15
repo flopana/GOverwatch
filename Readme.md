@@ -19,5 +19,6 @@ https://steamcommunity.com/dev/apikey
 ```json
 {
   "steamWebApiKey": "youre API Key here"
+  "networkDevice": "\\\\Device\\\\NPF_{ABCDE-EFGHI-JKMLNOP123456}"
 }
 ```
