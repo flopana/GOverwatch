@@ -75,23 +75,6 @@ func main() {
 
 	fmt.Println("Starting to Capture")
 
-	//devices, err := pcap.FindAllDevs()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//// Print ethernetDevice information
-	//fmt.Println("Devices found:")
-	//for _, ethernetDevice := range devices {
-	//	fmt.Println("\nName: ", ethernetDevice.Name)
-	//	fmt.Println("Description: ", ethernetDevice.Description)
-	//	fmt.Println("Devices addresses: ", ethernetDevice.Description)
-	//	for _, address := range ethernetDevice.Addresses {
-	//		fmt.Println("- IP address: ", address.IP)
-	//		fmt.Println("- Subnet mask: ", address.Netmask)
-	//	}
-	//}
-
 	//Open ethernetDevice
 	handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
 	if err != nil {log.Fatal(err) }
