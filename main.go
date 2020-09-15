@@ -120,7 +120,7 @@ func main() {
 				if player.SteamID64 != 0 && steamWebApiKey != ""{
 					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
-
+					//TODO: Implement ban status
 					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
 						profileurl = n.InnerText()
 					}
