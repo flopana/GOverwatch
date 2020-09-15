@@ -83,7 +83,7 @@ func main() {
 	for packet := range packetSource.Packets() {
 		//fmt.Printf("%s",packet.Data())
 		if strings.Contains(string(packet.Data()), ".dem.bz2"){
-			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "net")+3])
+			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
 			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
 			break
 		}
@@ -97,7 +97,8 @@ func main() {
 
 	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
 	if err != nil{
-		panic(err)
+		_ = os.Remove("demo.dem")
+		err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
 	}
 
 
