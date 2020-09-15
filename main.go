@@ -73,7 +73,7 @@ func main() {
 	}
 	defer config.Close()
 
-	fmt.Println("Starting to Capture")
+	fmt.Println("Searching for the demo\nPlease start downloading the Overwatch case")
 
 	//Open ethernetDevice
 	handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
@@ -87,7 +87,7 @@ func main() {
 	for packet := range packetSource.Packets() {
 		//fmt.Printf("%s",packet.Data())
 		if strings.Contains(string(packet.Data()), ".dem.bz2"){
-			fmt.Println("Found the demo starting to Download")
+			fmt.Println("Found the demo starting the download")
 			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
 			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
 			break
