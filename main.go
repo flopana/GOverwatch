@@ -4,17 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/antchfx/jsonquery"
-	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 	dem "github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/events"
-	"github.com/mholt/archiver/v3"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -73,38 +70,38 @@ func main() {
 	}
 	defer config.Close()
 
-	fmt.Println("Starting to Capture")
-
-	//Open ethernetDevice
-	handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
-	if err != nil {log.Fatal(err) }
-	defer handle.Close()
-
-	//Use the handle as a packet source to process all packets
-	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-	var first string
-	var second string
-	for packet := range packetSource.Packets() {
-		//fmt.Printf("%s",packet.Data())
-		if strings.Contains(string(packet.Data()), ".dem.bz2"){
-			fmt.Println("Found the demo starting to Download")
-			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
-			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
-			break
-		}
-	}
-	fileUrl := "http://"+first+second
-	err = DownloadFile("demo.dem.bz2", fileUrl)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Downloaded: " + fileUrl + "\n\n")
-
-	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
-	if err != nil{
-		_ = os.Remove("demo.dem")
-		err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
-	}
+	//fmt.Println("Starting to Capture")
+	//
+	////Open ethernetDevice
+	//handle, err = pcap.OpenLive(ethernetDevice, snapshot_len, promiscuous, timeout)
+	//if err != nil {log.Fatal(err) }
+	//defer handle.Close()
+	//
+	////Use the handle as a packet source to process all packets
+	//packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	//var first string
+	//var second string
+	//for packet := range packetSource.Packets() {
+	//	//fmt.Printf("%s",packet.Data())
+	//	if strings.Contains(string(packet.Data()), ".dem.bz2"){
+	//		fmt.Println("Found the demo starting to Download")
+	//		first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
+	//		second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
+	//		break
+	//	}
+	//}
+	//fileUrl := "http://"+first+second
+	//err = DownloadFile("demo.dem.bz2", fileUrl)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Println("Downloaded: " + fileUrl + "\n\n")
+	//
+	//err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
+	//if err != nil{
+	//	_ = os.Remove("demo.dem")
+	//	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
+	//}
 
 
 	demo, err := os.Open("demo.dem")
@@ -166,6 +163,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("\nEnd of Demo")
 }
 func DownloadFile(filepath string, url string) error {
 
