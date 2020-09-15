@@ -51,7 +51,7 @@ func main() {
 			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
 	}
 	if ethernetDevice == ""{
-		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put in in the ethernetDevice in config.json\n")
+		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put it in the ethernetDevice in config.json\n")
 		devices, err := pcap.FindAllDevs()
 		if err != nil {
 			log.Fatal(err)
