@@ -19,6 +19,7 @@ import (
 )
 
 var owStartRound int
+var owStartRoundSet bool
 const WarningColor = "\033[1;33m%s\033[0m"
 
 var (
@@ -103,6 +104,7 @@ func main() {
 	for packet := range packetSource.Packets() {
 		//fmt.Printf("%s",packet.Data())
 		if strings.Contains(string(packet.Data()), ".dem.bz2"){
+			fmt.Println("Found the demo starting to Download")
 			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
 			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
 			break
@@ -132,7 +134,7 @@ func main() {
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
-		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
+		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound && owStartRoundSet{
 			allplayers := p.GameState().Participants().Playing()
 			fmt.Println("\n##########################################################################")
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
@@ -173,6 +175,7 @@ func main() {
 
 		fmt.Println("In which round did your Overwatch case start?")
 		_, _ = fmt.Scanf("%d", &owStartRound)
+		owStartRoundSet = true
 	})
 
 	// Parse to end
