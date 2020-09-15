@@ -19,10 +19,10 @@ import (
 )
 
 var owStartRound int
+var owStartRoundSet bool
 const WarningColor = "\033[1;33m%s\033[0m"
 
 var (
-	device       string = "\\Device\\NPF_{AF220758-92F6-4291-BCBB-B03578A5B83F}" //TODO implement configuration for that
 	snapshot_len int32  = 1024
 	promiscuous  bool   = false
 	err          error
@@ -35,30 +35,48 @@ func main() {
   / ____/ __ \_   _____  ______      ______ _/ /______/ /_ 
  / / __/ / / / | / / _ \/ ___/ | /| / / __  / __/ ___/ __ \
 / /_/ / /_/ /| |/ /  __/ /   | |/ |/ / /_/ / /_/ /__/ / / /
-\____/\____/ |___/\___/_/    |__/|__/\__,_/\__/\___/_/ /_/
+\____/\____/ |___/\___/_/    |__/|__/\____/\__/\___/_/ /_/
 		`
 	fmt.Println(welcome)
-	fmt.Println("Starting to Capture")
 
-	//devices, err := pcap.FindAllDevs()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//// Print device information
-	//fmt.Println("Devices found:")
-	//for _, device := range devices {
-	//	fmt.Println("\nName: ", device.Name)
-	//	fmt.Println("Description: ", device.Description)
-	//	fmt.Println("Devices addresses: ", device.Description)
-	//	for _, address := range device.Addresses {
-	//		fmt.Println("- IP address: ", address.IP)
-	//		fmt.Println("- Subnet mask: ", address.Netmask)
-	//	}
-	//}
+	//https://steamcommunity.com/dev/apikey
+	config, err := os.Open("./config.json")
+	if err != nil{panic(err)}
+	doc, err := jsonquery.Parse(config)
+	if err != nil{panic(err)}
+	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
+	networkDevice := jsonquery.FindOne(doc, "networkDevice").InnerText()
+	if steamWebApiKey == ""{
+		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
+			"\notherwise you will not get the Profile links" +
+			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
+	}
+	if networkDevice == ""{
+		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put it in the networkDevice in config.json\n")
+		devices, err := pcap.FindAllDevs()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	//Open device
-	handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+		// Print networkDevice information
+		fmt.Println("Devices found:")
+		for _, ethernetDevice := range devices {
+			fmt.Println("\nName: ", ethernetDevice.Name)
+			fmt.Println("Description: ", ethernetDevice.Description)
+			fmt.Println("Devices addresses: ", ethernetDevice.Description)
+			for _, address := range ethernetDevice.Addresses {
+				fmt.Println("- IP address: ", address.IP)
+				fmt.Println("- Subnet mask: ", address.Netmask)
+			}
+		}
+		os.Exit(0)
+	}
+	defer config.Close()
+
+	fmt.Println("Searching for the demo\nPlease start downloading the Overwatch case")
+
+	//Open networkDevice
+	handle, err = pcap.OpenLive(networkDevice, snapshot_len, promiscuous, timeout)
 	if err != nil {log.Fatal(err) }
 	defer handle.Close()
 
@@ -69,13 +87,14 @@ func main() {
 	for packet := range packetSource.Packets() {
 		//fmt.Printf("%s",packet.Data())
 		if strings.Contains(string(packet.Data()), ".dem.bz2"){
-			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "net")+3])
+			fmt.Println("Found the demo starting the download")
+			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
 			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
 			break
 		}
 	}
 	fileUrl := "http://"+first+second
-	err := DownloadFile("demo.dem.bz2", fileUrl)
+	err = DownloadFile("demo.dem.bz2", fileUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -83,21 +102,11 @@ func main() {
 
 	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
 	if err != nil{
-		panic(err)
+		_ = os.Remove("demo.dem")
+		err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
 	}
 
-	//https://steamcommunity.com/dev/apikey
-	config, err := os.Open("./config.json")
-	doc, err := jsonquery.Parse(config)
-	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
-	if steamWebApiKey == ""{
-		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
-			"\notherwise you will not get the Profile links" +
-			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
-	}
-	defer config.Close()
 
-	//TODO: Implement HTTP Sniffing for .dem.bz2 link
 	demo, err := os.Open("demo.dem")
 	if err != nil {
 		panic(err)
@@ -108,7 +117,7 @@ func main() {
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
-		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound{
+		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound && owStartRoundSet{
 			allplayers := p.GameState().Participants().Playing()
 			fmt.Println("\n##########################################################################")
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
@@ -117,7 +126,7 @@ func main() {
 				if player.SteamID64 != 0 && steamWebApiKey != ""{
 					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
-
+					//TODO: Implement ban status
 					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
 						profileurl = n.InnerText()
 					}
@@ -149,6 +158,7 @@ func main() {
 
 		fmt.Println("In which round did your Overwatch case start?")
 		_, _ = fmt.Scanf("%d", &owStartRound)
+		owStartRoundSet = true
 	})
 
 	// Parse to end
@@ -156,6 +166,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("\nEnd of Demo")
 }
 func DownloadFile(filepath string, url string) error {
 
