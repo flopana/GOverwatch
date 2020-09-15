@@ -1,5 +1,5 @@
 # Goverwatch
-GOverwatch is a tool written in go to get the actual Demo from CS:GO Overwatch and find out whose the suspect.
+GOverwatch is a tool written in go to get the actual Demo from CS:GO Overwatch and find out who's the suspect.
 
 ## Installation
 Download the goverwatch.exe including the config.json
