@@ -23,7 +23,7 @@ https://steamcommunity.com/dev/apikey
 ```json
 {
   "steamWebApiKey": "youre API Key here",
-  "networkDevice": "\\\\Device\\\\NPF_{ABCDE-EFGHI-JKMLNOP123456}"
+  "networkDevice": "\\Device\\NPF_{ABCDE-EFGHI-JKMLNOP123456}"
 }
 ```
 Notice the two backticks to mask the second backtick otherwise json would interpret something there
