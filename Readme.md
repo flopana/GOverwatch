@@ -2,8 +2,10 @@
 GOverwatch is a tool written in go to get the actual Demo from CS:GO Overwatch and find out who's the suspect.
 
 ## Installation
-Download the goverwatch.exe including the config.json
-Refer to the Configuration part in this README or instructions by the program
+Download the goverwatch.exe including the config.json.
+Refer to the Configuration part in this README or instructions by the program.
+
+Also you need to install winpcap which is used to sniff your network traffic.
 
 Alternatively clone this repo and compile it yourself
 ```go build -o goverwatch.exe main.go```
