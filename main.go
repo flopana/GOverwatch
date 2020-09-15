@@ -97,7 +97,6 @@ func main() {
 	}
 	defer config.Close()
 
-	//TODO: Implement HTTP Sniffing for .dem.bz2 link
 	demo, err := os.Open("demo.dem")
 	if err != nil {
 		panic(err)
