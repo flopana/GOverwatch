@@ -1,4 +1,4 @@
-# Goverwatch
+# GOverwatch
 GOverwatch is a tool written in go to get the actual Demo from CS:GO Overwatch and find out who's the suspect.
 
 ## Installation
@@ -11,7 +11,7 @@ Alternatively clone this repo and compile it yourself
 ```go build -o goverwatch.exe main.go```
 
 ## Usage
-Star GOverwatch after finding the Demo it will prompt you and ask in which round your overwatch case started at.
+Start GOverwatch, after finding the Demo it will prompt you and ask in which round your overwatch case started at.
 
 ![alt text](https://i.imgur.com/lbsgVlp.png "GOverwatch Demo 01")
 
