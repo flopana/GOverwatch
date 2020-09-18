@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/antchfx/jsonquery"
 	"github.com/google/gopacket"
@@ -147,9 +146,10 @@ func main() {
 				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
-				fmt.Print("Advance to next round? [Press ENTER]")
-				reader := bufio.NewReader(os.Stdin)
-				_, _ = reader.ReadString('\n')
+			fmt.Print("Advance to next round? [Press ENTER]")
+			fmt.Scanln()
+			//reader := bufio.NewReader(os.Stdin)
+			//_, _ = reader.ReadString('\n')
 		}
 	})
 	p.RegisterEventHandler(func(e events.MatchStart) {
@@ -158,6 +158,7 @@ func main() {
 
 		fmt.Println("In which round did your Overwatch case start?")
 		_, _ = fmt.Scanf("%d", &owStartRound)
+		fmt.Scanln()
 		owStartRoundSet = true
 	})
 
