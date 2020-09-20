@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/antchfx/jsonquery"
 	"github.com/google/gopacket"
@@ -21,6 +20,7 @@ import (
 var owStartRound int
 var owStartRoundSet bool
 const WarningColor = "\033[1;33m%s\033[0m"
+const ErrorColor = "\033[1;31m%s\033[0m"
 
 var (
 	snapshot_len int32  = 1024
@@ -123,12 +123,26 @@ func main() {
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
 			for _, player := range allplayers {
 				var profileurl string
+				var vacStatus string
+				var gameBans int
+				var daysSinceLastBan string
 				if player.SteamID64 != 0 && steamWebApiKey != ""{
 					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
-					//TODO: Implement ban status
 					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
 						profileurl = n.InnerText()
+					}
+					doc, _ = jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
+					for _, n := range jsonquery.Find(doc, "players/*/VACBanned") {
+						vacStatus = n.InnerText()
+					}
+					for _, n := range jsonquery.Find(doc, "players/*/NumberOfVACBans") {
+						gameBans, _= strconv.Atoi(n.InnerText())
+					}
+					if vacStatus == "true" || gameBans > 0{
+						for _, n := range jsonquery.Find(doc, "players/*/DaysSinceLastBan") {
+							daysSinceLastBan = n.InnerText()
+						}
 					}
 				}
 				var team string
@@ -144,12 +158,25 @@ func main() {
 				}else {
 					botName = ""
 				}
+
+				var banPrint string
+				if vacStatus == "true" {
+					banPrint = "VAC "
+				}
+				if gameBans > 0{
+					banPrint += "GameBans: " + strconv.Itoa(gameBans)
+				}
+
 				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
+				if banPrint != "" {
+					fmt.Printf(ErrorColor, banPrint + " Days since last ban: " + daysSinceLastBan + "\n")
+				}
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
-				fmt.Print("Advance to next round? [Press ENTER]")
-				reader := bufio.NewReader(os.Stdin)
-				_, _ = reader.ReadString('\n')
+			fmt.Print("Advance to next round? [Press ENTER]")
+			fmt.Scanln()
+			//reader := bufio.NewReader(os.Stdin)
+			//_, _ = reader.ReadString('\n')
 		}
 	})
 	p.RegisterEventHandler(func(e events.MatchStart) {
@@ -158,6 +185,7 @@ func main() {
 
 		fmt.Println("In which round did your Overwatch case start?")
 		_, _ = fmt.Scanf("%d", &owStartRound)
+		fmt.Scanln()
 		owStartRoundSet = true
 	})
 
