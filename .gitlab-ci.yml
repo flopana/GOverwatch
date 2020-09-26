@@ -20,11 +20,12 @@ build_binary_without_release_tag:
   image: golang:buster
   before_script:
     - apt update && apt upgrade -y
-    - apt install libpcap-dev curl -y
+    - apt install libpcap-dev curl gcc-mingw-w64-x86-64 -y
     - go get
   script:
     - env GOOS=windows GOARCH=amd64 go build -o goverwatch_latest.exe main.go
     - curl --location --request GET 'https://cdn.aptinstall.de/delete?key='$API_KEY'&filename=goverwatch_latest.exe'
     - curl --location --request POST 'https://cdn.aptinstall.de/upload' --form 'file=@goverwatch_latest.exe' --form 'key='$API_KEY
+    - ls -al
 #  only:
 #    - master
