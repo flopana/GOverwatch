@@ -10,8 +10,6 @@ Also you need to install [npcap](https://nmap.org/npcap/windows-10.html) which i
 Alternatively clone this repo and compile it yourself
 ```go build -o goverwatch.exe main.go```
 
-Latest build: https://cdn.aptinstall.de/download/goverwatch_latest.exe
-
 ## Usage
 Start GOverwatch, after finding the Demo it will prompt you and ask in which round your overwatch case started at.
 
