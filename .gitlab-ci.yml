@@ -6,8 +6,8 @@ sonarqube:
   image:
     name: sonarsource/sonar-scanner-cli:latest
   variables:
-    SONAR_TOKEN: "d1fb96782f93b31a12879c1d3dd6dad07f216211"
-    SONAR_HOST_URL: "http://95.217.200.102:9000"
+    SONAR_TOKEN: $SONAR_TOKEN_GIT
+    SONAR_HOST_URL: $SONAR_URL_GIT
     SONAR_USER_HOME: $CI_PROJECT_DIR"/.sonar" # Defines the location of the analysis task cache
     GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
   cache:
@@ -16,7 +16,7 @@ sonarqube:
       - .sonar/cache
   stage: tests
   script:
-    - sonar-scanner -Dsonar.projectKey=goverwatch -Dsonar.login=admin -Dsonar.password=admin
+    - sonar-scanner -Dsonar.projectKey=goverwatch -Dsonar.login=$SONAR_LOGIN_GIT -Dsonar.password=$SONAR_PW_GIT
   allow_failure: true
   only:
     - merge_requests
