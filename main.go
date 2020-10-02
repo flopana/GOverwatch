@@ -19,8 +19,10 @@ import (
 
 var owStartRound int
 var owStartRoundSet bool
+
 // ANSI Color yellow
 const WarningColor = "\033[1;33m%s\033[0m"
+
 // ANSI Color red
 const ErrorColor = "\033[1;31m%s\033[0m"
 
@@ -33,27 +35,31 @@ var (
 )
 
 func main() {
-	welcome := `   __________                                 __       __  
-  / ____/ __ \_   _____  ______      ______ _/ /______/ /_ 
+	welcome := `   __________                                 __       __
+  / ____/ __ \_   _____  ______      ______ _/ /______/ /_
  / / __/ / / / | / / _ \/ ___/ | /| / / __  / __/ ___/ __ \
 / /_/ / /_/ /| |/ /  __/ /   | |/ |/ / /_/ / /_/ /__/ / / /
 \____/\____/ |___/\___/_/    |__/|__/\____/\__/\___/_/ /_/
-		`
+                `
 	fmt.Println(welcome)
 
 	//https://steamcommunity.com/dev/apikey
 	config, err := os.Open("./config.json")
-	if err != nil{panic(err)}
+	if err != nil {
+		panic(err)
+	}
 	doc, err := jsonquery.Parse(config)
-	if err != nil{panic(err)}
+	if err != nil {
+		panic(err)
+	}
 	steamWebApiKey := jsonquery.FindOne(doc, "steamWebApiKey").InnerText()
 	networkDevice := jsonquery.FindOne(doc, "networkDevice").InnerText()
-	if steamWebApiKey == ""{
-		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json," +
-			"\notherwise you will not get the Profile links" +
+	if steamWebApiKey == "" {
+		fmt.Printf(WarningColor, "WARNING Your SteamWebApiKey is empty consider configuring this in the config.json,"+
+			"\notherwise you will not get the Profile links"+
 			"\nGet your API Key here https://steamcommunity.com/dev/apikey\n\n")
 	}
-	if networkDevice == ""{
+	if networkDevice == "" {
 		fmt.Printf(WarningColor, "The ethernet device in the config.json is empty choose one below\nPick a device Name and put it in the networkDevice in config.json\n")
 		devices, err := pcap.FindAllDevs()
 		if err != nil {
@@ -79,7 +85,9 @@ func main() {
 
 	//Open networkDevice
 	handle, err = pcap.OpenLive(networkDevice, snapshotLen, promiscuous, timeout)
-	if err != nil {log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer handle.Close()
 
 	//Use the handle as a packet source to process all packets
@@ -88,14 +96,14 @@ func main() {
 	var second string
 	for packet := range packetSource.Packets() {
 		//fmt.Printf("%s",packet.Data())
-		if strings.Contains(string(packet.Data()), ".dem.bz2"){
+		if strings.Contains(string(packet.Data()), ".dem.bz2") {
 			fmt.Println("Found the demo starting the download")
-			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6:strings.Index(string(packet.Data()), "Accept:")-2])
-			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4:strings.Index(string(packet.Data()), "HTTP")-1])
+			first = string(packet.Data()[strings.Index(string(packet.Data()), "Host:")+6 : strings.Index(string(packet.Data()), "Accept:")-2])
+			second = string(packet.Data()[strings.Index(string(packet.Data()), "GET")+4 : strings.Index(string(packet.Data()), "HTTP")-1])
 			break
 		}
 	}
-	fileUrl := "http://"+first+second
+	fileUrl := "http://" + first + second
 	err = DownloadFile("demo.dem.bz2", fileUrl)
 	if err != nil {
 		panic(err)
@@ -103,12 +111,13 @@ func main() {
 	fmt.Println("Downloaded: " + fileUrl + "\n\n")
 
 	err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
-	if err != nil{
+	if err != nil {
 		_ = os.Remove("demo.dem")
 		err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
-		if err != nil{panic(err)}
+		if err != nil {
+			panic(err)
+		}
 	}
-
 
 	demo, err := os.Open("demo.dem")
 	if err != nil {
@@ -120,7 +129,7 @@ func main() {
 	defer p.Close()
 	//Register handler on kill events
 	p.RegisterEventHandler(func(e events.RoundFreezetimeEnd) {
-		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound && owStartRoundSet{
+		if p.GameState().TotalRoundsPlayed()+1 >= owStartRound && owStartRoundSet {
 			allplayers := p.GameState().Participants().Playing()
 			fmt.Println("\n##########################################################################")
 			fmt.Printf("Current Round: %d\n\n", p.GameState().TotalRoundsPlayed()+1)
@@ -129,7 +138,7 @@ func main() {
 				var vacStatus string
 				var gameBans int
 				var daysSinceLastBan string
-				if player.SteamID64 != 0 && steamWebApiKey != ""{
+				if player.SteamID64 != 0 && steamWebApiKey != "" {
 					//https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries
 					doc, _ := jsonquery.LoadURL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=" + steamWebApiKey + "&steamids=" + strconv.FormatUint(player.SteamID64, 10))
 					for _, n := range jsonquery.Find(doc, "response/players/*/profileurl") {
@@ -140,9 +149,9 @@ func main() {
 						vacStatus = n.InnerText()
 					}
 					for _, n := range jsonquery.Find(doc, "players/*/NumberOfVACBans") {
-						gameBans, _= strconv.Atoi(n.InnerText())
+						gameBans, _ = strconv.Atoi(n.InnerText())
 					}
-					if vacStatus == "true" || gameBans > 0{
+					if vacStatus == "true" || gameBans > 0 {
 						for _, n := range jsonquery.Find(doc, "players/*/DaysSinceLastBan") {
 							daysSinceLastBan = n.InnerText()
 						}
@@ -151,14 +160,14 @@ func main() {
 				var team string
 				if player.Team == 2 {
 					team = "T"
-				}else {
+				} else {
 					team = "CT"
 				}
 
 				var botName string
-				if player.IsBot{
+				if player.IsBot {
 					botName = "BOT "
-				}else {
+				} else {
 					botName = ""
 				}
 
@@ -166,13 +175,13 @@ func main() {
 				if vacStatus == "true" {
 					banPrint = "VAC "
 				}
-				if gameBans > 0{
+				if gameBans > 0 {
 					banPrint += "GameBans: " + strconv.Itoa(gameBans)
 				}
 
 				fmt.Printf("Team: %s ,Player: %s, SteamID64: %d, Profile: %s\n", team, botName+player.Name, player.SteamID64, profileurl)
 				if banPrint != "" {
-					fmt.Printf(ErrorColor, banPrint + " Days since last ban: " + daysSinceLastBan + "\n")
+					fmt.Printf(ErrorColor, banPrint+" Days since last ban: "+daysSinceLastBan+"\n")
 				}
 				fmt.Printf("K: %d, A: %d, D: %d\n\n", player.Kills(), player.Assists(), player.Deaths())
 			}
@@ -199,11 +208,12 @@ func main() {
 	}
 	fmt.Println("\nEnd of Demo")
 }
+
 /**
 DownloadFile
 
 Downloads the file to the provided filepath from the provided url
- */
+*/
 func DownloadFile(filepath string, url string) error {
 
 	// Get the data
