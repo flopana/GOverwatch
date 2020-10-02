@@ -19,15 +19,17 @@ import (
 
 var owStartRound int
 var owStartRoundSet bool
+// ANSI Color yellow
 const WarningColor = "\033[1;33m%s\033[0m"
+// ANSI Color red
 const ErrorColor = "\033[1;31m%s\033[0m"
 
 var (
-	snapshot_len int32  = 1024
-	promiscuous  bool   = false
-	err          error
-	timeout      time.Duration = 10 * time.Second
-	handle       *pcap.Handle
+	snapshotLen int32 = 1024
+	promiscuous bool  = false
+	err         error
+	timeout     time.Duration = 10 * time.Second
+	handle      *pcap.Handle
 )
 
 func main() {
@@ -76,7 +78,7 @@ func main() {
 	fmt.Println("Searching for the demo\nPlease start downloading the Overwatch case")
 
 	//Open networkDevice
-	handle, err = pcap.OpenLive(networkDevice, snapshot_len, promiscuous, timeout)
+	handle, err = pcap.OpenLive(networkDevice, snapshotLen, promiscuous, timeout)
 	if err != nil {log.Fatal(err) }
 	defer handle.Close()
 
@@ -104,6 +106,7 @@ func main() {
 	if err != nil{
 		_ = os.Remove("demo.dem")
 		err = archiver.DecompressFile("demo.dem.bz2", "demo.dem")
+		if err != nil{panic(err)}
 	}
 
 
@@ -196,6 +199,11 @@ func main() {
 	}
 	fmt.Println("\nEnd of Demo")
 }
+/**
+DownloadFile
+
+Downloads the file to the provided filepath from the provided url
+ */
 func DownloadFile(filepath string, url string) error {
 
 	// Get the data
