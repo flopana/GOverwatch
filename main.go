@@ -20,10 +20,10 @@ import (
 var owStartRound int
 var owStartRoundSet bool
 
-// ANSI Color yellow
+//WarningColor ANSI Color yellow
 const WarningColor = "\033[1;33m%s\033[0m"
 
-// ANSI Color red
+//ErrorColor ANSI Color red
 const ErrorColor = "\033[1;31m%s\033[0m"
 
 var (
@@ -210,9 +210,7 @@ func main() {
 }
 
 /**
-DownloadFile
-
-Downloads the file to the provided filepath from the provided url
+DownloadFile Downloads the file to the provided filepath from the provided url
 */
 func DownloadFile(filepath string, url string) error {
 
