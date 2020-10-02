@@ -16,7 +16,7 @@ sonarqube:
       - .sonar/cache
   stage: tests
   script:
-    - sonar-scanner -Dsonar.projectKey=aptinstall-cdn -Dsonar.login=admin -Dsonar.password=admin
+    - sonar-scanner -Dsonar.projectKey=goverwatch -Dsonar.login=admin -Dsonar.password=admin
   allow_failure: true
   only:
     - merge_requests
